@@ -16,5 +16,11 @@ Cargo.lock
 
 # misc
 ~
+<<<<<<< HEAD
 .DS_Store
 .vscode
+=======
+
+# logging
+log/
+>>>>>>> added logging
