@@ -1,4 +1,6 @@
 use log::{info, warn, error};
+mod messages;
+mod sensor;
 mod logging;
 mod parser;
 mod command;
