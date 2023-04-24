@@ -1,0 +1,19 @@
+WHITESPACE = _{ " " }
+type = { "bool" | "float" }
+number = @{ (ASCII_DIGIT+) ~ ("." ~ ASCII_DIGIT+)? }
+bool = { "true" | "false" }
+value = { number | bool }
+identifier = @{ (ASCII_ALPHA | ASCII_DIGIT | "_")+ }
+prim_expr = { identifier | value }
+bool_expr = { ("(" ~ ("and" | "or" | "==" | ">" | "<") ~ expr ~ expr ~ ")") | bool }
+arith_expr = { "(" ~ ("+" | "-" | "*" | "/") ~ expr ~ expr ~ ")" }
+expr = { (arith_expr | bool_expr | prim_expr) }
+speaker = { identifier }
+principal = { identifier }
+says = { "says" ~ bool_expr+ }
+create = { "create" ~ identifier ~ type ~ bool_expr}
+assign = { "assign" ~ identifier ~ value }
+speaksfor = { "speaksfor" ~ principal ~ principal ~ identifier }
+subprincipal = { "subprincipal" ~ principal ~ principal }
+stmt = { speaker ~ (says | create | assign | speaksfor | subprincipal) }
+main = { SOI ~ (stmt ~ NEWLINE)+ ~  EOI }
