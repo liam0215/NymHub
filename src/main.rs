@@ -3,6 +3,7 @@ mod messages;
 mod sensor;
 mod logging;
 mod parser;
+mod hub;
 mod command;
 
 fn main() {
