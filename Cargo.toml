@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 pest = "2.0"
 pest_derive = "2.0"
+log = "0.4.17"
+log4rs = "1.2.0"
