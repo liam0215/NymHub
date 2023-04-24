@@ -1,6 +1,6 @@
 #![allow(dead_code, unused_variables)]
 use nym_sdk::mixnet;
-use log::{info, warn, error};
+use log::{info};
 
 pub struct Hub{}
 
