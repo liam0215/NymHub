@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::command::{Action, Command};
+use crate::command::{Assign, Command, Create, Says, Speaksfor, Subprincipal};
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
@@ -12,9 +12,9 @@ pub struct NymHubDSL;
 type PestError = Box<pest::error::Error<Rule>>;
 
 impl NymHubDSL {
-    pub fn parse_msg(msg: &str) -> Result<Vec<Command>, PestError> {
+    pub fn parse_msg(msg: &str) -> Result<Vec<Box<dyn Command>>, PestError> {
         let pairs = NymHubDSL::parse(Rule::main, msg)?;
-        let mut commands: Vec<Command> = Vec::new();
+        let mut commands: Vec<Box<dyn Command>> = Vec::new();
         for pair in pairs.into_iter() {
             if pair.as_rule() == Rule::main {
                 Self::parse_main(pair, &mut commands)?;
@@ -25,7 +25,7 @@ impl NymHubDSL {
         Ok(commands)
     }
 
-    fn parse_main(main: Pair<Rule>, commands: &mut Vec<Command>) -> Result<(), PestError> {
+    fn parse_main(main: Pair<Rule>, commands: &mut Vec<Box<dyn Command>>) -> Result<(), PestError> {
         for stmt in main.into_inner() {
             let stmt_rule = stmt.as_rule();
             if stmt_rule == Rule::stmt {
@@ -37,7 +37,7 @@ impl NymHubDSL {
         Ok(())
     }
 
-    fn parse_stmt(stmt: Pair<Rule>, commands: &mut Vec<Command>) -> Result<(), PestError> {
+    fn parse_stmt(stmt: Pair<Rule>, commands: &mut Vec<Box<dyn Command>>) -> Result<(), PestError> {
         let mut speaker = "";
         for action in stmt.into_inner() {
             if action.as_rule() == Rule::speaker {
@@ -52,23 +52,23 @@ impl NymHubDSL {
     fn parse_action(
         speaker: &&str,
         action: &Pair<Rule>,
-        commands: &mut Vec<Command>,
+        commands: &mut Vec<Box<dyn Command>>,
     ) -> Result<(), PestError> {
         match action.as_rule() {
             Rule::says => {
-                commands.push(Command::new(speaker.to_string(), Action::Says));
+                commands.push(Box::new(Says::with_speaker(speaker.to_string())));
             }
             Rule::assign => {
-                commands.push(Command::new(speaker.to_string(), Action::Assign));
+                commands.push(Box::new(Assign::with_speaker(speaker.to_string())));
             }
             Rule::create => {
-                commands.push(Command::new(speaker.to_string(), Action::Create));
+                commands.push(Box::new(Create::with_speaker(speaker.to_string())));
             }
             Rule::speaksfor => {
-                commands.push(Command::new(speaker.to_string(), Action::Speaksfor));
+                commands.push(Box::new(Speaksfor::with_speaker(speaker.to_string())));
             }
             Rule::subprincipal => {
-                commands.push(Command::new(speaker.to_string(), Action::Subprincipal));
+                commands.push(Box::new(Subprincipal::with_speaker(speaker.to_string())));
             }
             _ => unreachable!(),
         }
@@ -110,7 +110,6 @@ mod test {
         const MSG: &str = "user1 create ac_on bool true\n";
         let commands = NymHubDSL::parse_msg(&MSG.to_string()).unwrap();
         assert_eq!(commands.len(), 1);
-        assert_eq!(commands[0].speaker, "user1");
-        assert_eq!(commands[0].action, Action::Create);
+        assert_eq!(commands[0].speaker(), "user1");
     }
 }
