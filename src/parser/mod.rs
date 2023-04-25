@@ -16,12 +16,11 @@ impl NymHubDSL {
         let pairs = NymHubDSL::parse(Rule::main, msg)?;
         let mut commands: Vec<Command> = Vec::new();
         for pair in pairs.into_iter() {
-            match pair.as_rule() {
-                Rule::main => {
-                    Self::parse_main(pair, &mut commands)?;
-                }
-                _ => unreachable!(),
-            };
+            if pair.as_rule() == Rule::main {
+                Self::parse_main(pair, &mut commands)?;
+            } else {
+                unreachable!();
+            }
         }
         Ok(commands)
     }
