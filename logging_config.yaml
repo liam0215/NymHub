@@ -29,13 +29,13 @@ appenders:
       roller:
         kind: delete
 root:
-  level: trace
+  level: INFO
   appenders:
     - my_stdout
     - my_file_logger
 loggers:
   deep:
-    level: info
+    level: INFO
     appenders:
       - my_deep_file_logger
     additive: false
