@@ -1,16 +1,14 @@
 #![allow(dead_code, unused_variables)]
+use log::info;
 use nym_sdk::mixnet;
-use log::{info};
 
-pub struct Hub{}
-
+pub struct Hub {}
 
 impl Hub {
     pub fn init() -> Self {
-        Hub{}
+        Hub {}
     }
     pub async fn blocking_receive(&self) -> ! {
-
         info!("starting up nym client...");
         // Passing no config makes the client fire up an ephemeral session and figure shit out on its own
         let mut client = mixnet::MixnetClient::connect_new().await.unwrap();
@@ -25,7 +23,7 @@ impl Hub {
         println!("Waiting for message (ctrl-c to exit)");
         client
             .on_messages(|msg| println!("Received: {}", String::from_utf8_lossy(&msg.message)))
-        .await;
+            .await;
 
         panic!();
     }

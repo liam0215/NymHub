@@ -1,9 +1,9 @@
-mod messages;
-mod sensor;
-mod logging;
-mod parser;
-mod hub;
 mod command;
+mod hub;
+mod logging;
+mod messages;
+mod parser;
+mod sensor;
 
 use log::{error, info};
 use std::env;
@@ -39,5 +39,5 @@ fn match_arg_or_err(index: usize, err_msg: &str) -> String {
         panic!("{}", err_msg);
     }
 
-    return args[index].to_string()
+    return args[index].to_string();
 }

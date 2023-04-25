@@ -1,8 +1,8 @@
 #![allow(dead_code, unused_variables)]
 
-use nym_sdk::mixnet;
 use crate::messages;
 use log::info;
+use nym_sdk::mixnet;
 
 type SendResult = Result<(), ()>;
 type Address = mixnet::Recipient;
@@ -18,10 +18,13 @@ impl Sensor {
         Self::init(address).await
     }
     pub async fn init(address: Address) -> Self {
-        info!("creating sensor and init mixnet client, pointing at: {}", &address);
+        info!(
+            "creating sensor and init mixnet client, pointing at: {}",
+            &address
+        );
         Self {
             client: mixnet::MixnetClient::connect_new().await.unwrap(),
-            hub_address: address
+            hub_address: address,
         }
     }
 
@@ -41,7 +44,9 @@ impl Sensor {
 
     async fn send(&self, msg: messages::Message) -> SendResult {
         info!("attempting to send {} to {}", &msg, &self.hub_address);
-        self.client.send_str(self.hub_address, &msg.to_string()).await;
+        self.client
+            .send_str(self.hub_address, &msg.to_string())
+            .await;
         info!("successfully sent {} to {}", &msg, &self.hub_address);
         Ok(())
     }

@@ -24,7 +24,9 @@ impl fmt::Display for Message {
 impl Default for Message {
     fn default() -> Self {
         Self {
-            header: Header { pub_key: String::from("testpub") },
+            header: Header {
+                pub_key: String::from("testpub"),
+            },
             payload: String::from("testpayload"),
         }
     }
