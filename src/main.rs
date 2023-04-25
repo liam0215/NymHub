@@ -39,5 +39,5 @@ fn match_arg_or_err(index: usize, err_msg: &str) -> String {
         panic!("{}", err_msg);
     }
 
-    return args[index].to_string();
+    args[index].to_string()
 }
