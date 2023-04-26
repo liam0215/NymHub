@@ -45,7 +45,7 @@ impl Sensor {
     async fn send(&self, msg: messages::Message) -> SendResult {
         info!("attempting to send {} to {}", &msg, &self.hub_address);
         self.client
-            .send_str(self.hub_address, &msg.to_string())
+            .send_str(self.hub_address, &serde_json::to_string(&msg).unwrap())
             .await;
         info!("successfully sent {} to {}", &msg, &self.hub_address);
         Ok(())

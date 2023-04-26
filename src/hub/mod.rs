@@ -1,6 +1,8 @@
 #![allow(dead_code, unused_variables)]
 use crate::common::Address;
-use log::info;
+use crate::messages::Message;
+use crate::parser;
+use log::{error, info};
 use nym_sdk::mixnet;
 
 pub struct Hub {
@@ -22,7 +24,22 @@ impl Hub {
     pub async fn blocking_receive(&mut self) -> ! {
         info!("Waiting for message (ctrl-c to exit)");
         self.client
-            .on_messages(|msg| info!("Received: {}", String::from_utf8_lossy(&msg.message)))
+            .on_messages(|raw_msg| {
+                let raw_msg_string = String::from_utf8_lossy(&raw_msg.message);
+                info!("Received raw: {}", &raw_msg_string);
+
+                let msg: Message = serde_json::from_str(&raw_msg_string).unwrap();
+                info!("Received parsed: {:#?}", &msg);
+                match parser::NymHubDSL::parse_msg(&msg.payload) {
+                    Ok(cmds) => {
+                        info!("successful parse");
+                        cmds.iter().for_each(|cmd| cmd.execute());
+                    }
+                    Err(err) => {
+                        error!("cannot parse, retting no-op error, input_str was: {}", &msg)
+                    }
+                }
+            })
             .await;
 
         panic!();

@@ -13,6 +13,7 @@ type PestError = Box<pest::error::Error<Rule>>;
 
 impl NymHubDSL {
     pub fn parse_msg(msg: &str) -> Result<Vec<Box<dyn Command>>, PestError> {
+        dbg!(msg);
         let pairs = NymHubDSL::parse(Rule::main, msg)?;
         let mut commands: Vec<Box<dyn Command>> = Vec::new();
         for pair in pairs.into_iter() {

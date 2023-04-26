@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+use std::fmt::Debug;
 
 pub trait Command {
     fn execute(&self);
