@@ -1,17 +1,18 @@
 #![allow(dead_code)]
+use serde::{Deserialize, Serialize};
 use std::fmt;
-
-#[derive(Debug)]
-pub struct Message {
-    header: Header,
-    payload: Payload,
-}
 
 type Payload = String;
 type Key = String;
 
-#[derive(Debug)]
-struct Header {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Message {
+    pub header: Header,
+    pub payload: Payload,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Header {
     pub_key: Key,
 }
 
@@ -27,7 +28,7 @@ impl Default for Message {
             header: Header {
                 pub_key: String::from("testpub"),
             },
-            payload: String::from("testpayload"),
+            payload: String::from("user1 create ac_on bool true\n"),
         }
     }
 }

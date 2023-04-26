@@ -15,6 +15,8 @@ tokio = { version = "1.27.0", features = ["full"] }
 env_logger = "0.10.0"
 testing_logger = "0.1.1"
 async-trait = "0.1.68"
+serde_json = "1.0.96"
+serde = "1.0.160"
 
 [dev-dependencies]
 rusty-hook = "^0.11.2"
