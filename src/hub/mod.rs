@@ -31,45 +31,24 @@ impl Hub {
 
 #[cfg(test)]
 mod test {
+    use crate::common::testing;
     use log::Level;
     extern crate testing_logger;
 
     use super::*;
-
-    fn before_each() {
-        testing_logger::setup();
-    }
 
     async fn get_hub() -> Hub {
         Hub::init().await
     }
 
     fn validate_logs(expected_logs: &[(&str, Level)]) {
-        testing_logger::validate(|all_logs| {
-            let target = "iot_hub::hub".to_string();
-
-            let captured_logs: Vec<&testing_logger::CapturedLog> =
-                all_logs.iter().filter(|x| x.target == target).collect();
-
-            assert_eq!(captured_logs.len(), expected_logs.len());
-
-            captured_logs
-                .iter()
-                .enumerate()
-                .map(|(i, log)| (log.body.as_str(), log.level, i))
-                .zip(
-                    expected_logs
-                        .iter()
-                        .enumerate()
-                        .map(|(i, ex)| (ex.0, ex.1, i)),
-                )
-                .for_each(|(log_tup, expected_tup)| assert_eq!(log_tup, expected_tup.clone()));
-        });
+        let target = "iot_hub::hub".to_string();
+        testing::validate_logs(target, expected_logs);
     }
 
     #[tokio::test]
     async fn test_init_hub() {
-        before_each();
+        testing::before_each();
         let hub = get_hub().await;
         dbg!(hub.client.identity().to_base58_string());
 
