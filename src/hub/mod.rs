@@ -1,30 +1,70 @@
 #![allow(dead_code, unused_variables)]
+use crate::common::Address;
 use log::info;
 use nym_sdk::mixnet;
 
-pub struct Hub {}
+pub struct Hub {
+    client: mixnet::MixnetClient,
+}
 
 impl Hub {
-    pub fn init() -> Self {
-        Hub {}
-    }
-    pub async fn blocking_receive(&self) -> ! {
+    pub async fn init() -> Self {
         info!("starting up nym client...");
-        // Passing no config makes the client fire up an ephemeral session and figure shit out on its own
-        let mut client = mixnet::MixnetClient::connect_new().await.unwrap();
+        let client = mixnet::MixnetClient::connect_new().await.unwrap();
+        info!("established connection with client with hub");
+        Self { client }
+    }
 
-        // Be able to get our client address
-        let our_address = client.nym_address();
-        println!("Our client nym address is: {our_address}");
+    pub fn address(&self) -> Address {
+        *self.client.nym_address()
+    }
 
-        // Send a message throught the mixnet to ourselves
-        client.send_str(*our_address, "hello there").await;
-
-        println!("Waiting for message (ctrl-c to exit)");
-        client
-            .on_messages(|msg| println!("Received: {}", String::from_utf8_lossy(&msg.message)))
+    pub async fn blocking_receive(&mut self) -> ! {
+        info!("Waiting for message (ctrl-c to exit)");
+        self.client
+            .on_messages(|msg| info!("Received: {}", String::from_utf8_lossy(&msg.message)))
             .await;
 
         panic!();
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::common::testing;
+    use log::Level;
+    extern crate testing_logger;
+
+    use super::*;
+
+    async fn get_hub() -> Hub {
+        Hub::init().await
+    }
+
+    fn validate_logs(expected_logs: &[(&str, Level)]) {
+        let target = "iot_hub::hub".to_string();
+        testing::validate_logs(target, expected_logs);
+    }
+
+    #[tokio::test]
+    async fn test_init_hub() {
+        testing::before_each();
+        let hub = get_hub().await;
+
+        assert!(hub.client.identity().to_base58_string().len() != 0);
+        let expected_logs = [
+            ("starting up nym client...", Level::Info),
+            ("established connection with client with hub", Level::Info),
+        ];
+
+        validate_logs(&expected_logs);
+    }
+
+    #[tokio::test]
+    async fn test_get_address() {
+        testing::before_each();
+        let hub = get_hub().await;
+
+        assert!(hub.address().to_string().len() != 0);
     }
 }
