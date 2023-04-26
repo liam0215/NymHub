@@ -1,11 +1,11 @@
 #![allow(dead_code, unused_variables)]
 
+use crate::common::Address;
 use crate::messages;
 use log::info;
 use nym_sdk::mixnet;
 
 type SendResult = Result<(), ()>;
-type Address = mixnet::Recipient;
 
 pub struct Sensor {
     client: mixnet::MixnetClient,

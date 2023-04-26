@@ -1,30 +1,40 @@
 #![allow(dead_code, unused_variables)]
+use crate::common::Address;
 use log::info;
 use nym_sdk::mixnet;
 
-pub struct Hub {}
+pub struct Hub {
+    client: mixnet::MixnetClient,
+}
 
 impl Hub {
-    pub fn init() -> Self {
-        Hub {}
-    }
-    pub async fn blocking_receive(&self) -> ! {
+    pub async fn init() -> Self {
         info!("starting up nym client...");
-        // Passing no config makes the client fire up an ephemeral session and figure shit out on its own
-        let mut client = mixnet::MixnetClient::connect_new().await.unwrap();
+        let client = mixnet::MixnetClient::connect_new().await.unwrap();
+        Self { client }
+    }
 
-        // Be able to get our client address
-        let our_address = client.nym_address();
-        println!("Our client nym address is: {our_address}");
+    pub fn address(&self) -> Address {
+        *self.client.nym_address()
+    }
 
-        // Send a message throught the mixnet to ourselves
-        client.send_str(*our_address, "hello there").await;
-
-        println!("Waiting for message (ctrl-c to exit)");
-        client
-            .on_messages(|msg| println!("Received: {}", String::from_utf8_lossy(&msg.message)))
+    pub async fn blocking_receive(&mut self) -> ! {
+        info!("Waiting for message (ctrl-c to exit)");
+        self.client
+            .on_messages(|msg| info!("Received: {}", String::from_utf8_lossy(&msg.message)))
             .await;
 
         panic!();
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_parse_says() {
+        const MSG: &str = "user1 says ( or ( < temp 70 ) ac_on )\n";
+        let _pairs = NymHubDSL::parse(Rule::main, MSG).unwrap_or_else(|e| panic!("{}", e));
     }
 }

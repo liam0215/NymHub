@@ -1,4 +1,5 @@
 mod command;
+mod common;
 mod hub;
 mod logging;
 mod messages;
@@ -15,7 +16,8 @@ async fn main() {
     match match_arg_or_err(1, "Not enough args provided").as_str() {
         "hub" => {
             info!("starting up hub...");
-            let hub = hub::Hub::init();
+            let mut hub = hub::Hub::init().await;
+            info!("hub address is: {}", &hub.address());
             hub.blocking_receive().await;
         }
         "sensor" => {
