@@ -44,24 +44,42 @@ mod test {
         Hub::init().await
     }
 
+    fn validate_logs(expected_logs: &[(&str, Level)]) {
+        testing_logger::validate(|all_logs| {
+            let target = "iot_hub::hub".to_string();
+
+            let captured_logs: Vec<&testing_logger::CapturedLog> =
+                all_logs.iter().filter(|x| x.target == target).collect();
+
+            assert_eq!(captured_logs.len(), expected_logs.len());
+
+            captured_logs
+                .iter()
+                .enumerate()
+                .map(|(i, log)| (log.body.as_str(), log.level, i))
+                .zip(
+                    expected_logs
+                        .iter()
+                        .enumerate()
+                        .map(|(i, ex)| (ex.0, ex.1, i)),
+                )
+                .for_each(|(log_tup, expected_tup)| assert_eq!(log_tup, expected_tup.clone()));
+        });
+    }
+
     #[tokio::test]
     async fn test_init_hub() {
         before_each();
         let hub = get_hub().await;
         dbg!(hub.client.identity().to_base58_string());
+
         assert!(hub.client.identity().to_base58_string().len() != 0);
 
-        testing_logger::validate(|all_logs| {
-            let target = "iot_hub::hub".to_string();
-            let captured_logs: Vec<&testing_logger::CapturedLog> =
-                all_logs.iter().filter(|x| x.target == target).collect();
-            assert_eq!(captured_logs.len(), 2);
-            assert_eq!(captured_logs[0].body, "starting up nym client...");
-            assert_eq!(
-                captured_logs[1].body,
-                "established connection with client with hub"
-            );
-            assert!(captured_logs.iter().all(|x| x.level == Level::Info));
-        });
+        let expected_logs = [
+            ("starting up nym client...", Level::Info),
+            ("established connection with client with hub", Level::Info),
+        ];
+
+        validate_logs(&expected_logs);
     }
 }
