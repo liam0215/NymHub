@@ -50,15 +50,21 @@ mod test {
     async fn test_init_hub() {
         testing::before_each();
         let hub = get_hub().await;
-        dbg!(hub.client.identity().to_base58_string());
 
         assert!(hub.client.identity().to_base58_string().len() != 0);
-
         let expected_logs = [
             ("starting up nym client...", Level::Info),
             ("established connection with client with hub", Level::Info),
         ];
 
         validate_logs(&expected_logs);
+    }
+
+    #[tokio::test]
+    async fn test_get_address() {
+        testing::before_each();
+        let hub = get_hub().await;
+
+        assert!(hub.address().to_string().len() != 0);
     }
 }
