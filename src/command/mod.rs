@@ -5,9 +5,8 @@ pub trait Command {
     fn speaker(&self) -> &str;
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum DSLType {
-    #[default]
     Bool,
     Float,
 }
@@ -24,16 +23,16 @@ impl Default for DSLValue {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Create {
     pub speaker: String,
     pub id: String,
     pub v_type: DSLType,
-    pub free: bool,
+    pub free: BoolExpr,
 }
 
 impl Create {
-    pub fn new(speaker: String, id: String, v_type: DSLType, free: bool) -> Self {
+    pub fn new(speaker: String, id: String, v_type: DSLType, free: BoolExpr) -> Self {
         Create {
             speaker,
             id,
@@ -47,12 +46,12 @@ impl Create {
             speaker,
             id: String::new(),
             v_type: DSLType::Bool,
-            free: false,
+            free: BoolExpr::Bool(false),
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Assign {
     pub speaker: String,
     pub id: String,
@@ -73,7 +72,7 @@ impl Assign {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Says {
     pub speaker: String,
     // TODO: Add real bool expression
@@ -96,7 +95,7 @@ impl Says {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Speaksfor {
     pub speaker: String,
     pub principal1: String,
@@ -124,7 +123,7 @@ impl Speaksfor {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Subprincipal {
     pub speaker: String,
     pub principal1: String,
@@ -198,4 +197,46 @@ impl Command for Subprincipal {
     fn speaker(&self) -> &str {
         &self.speaker
     }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BoolOp {
+    And,
+    Or,
+    Equals,
+    LessThan,
+    GreaterThan,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum BoolExpr {
+    Bool(bool),
+    Op(BoolOp, Box<Expr>, Box<Expr>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum PrimExpr {
+    Id(String),
+    Value(DSLValue),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ArithOp {
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum ArithExpr {
+    Number(f32),
+    Op(ArithOp, Box<Expr>, Box<Expr>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Expr {
+    Prim(PrimExpr),
+    Bool(BoolExpr),
+    Arithmetic(ArithExpr),
 }
