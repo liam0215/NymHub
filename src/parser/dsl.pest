@@ -1,17 +1,22 @@
 WHITESPACE = _{ " " }
-type = { "bool" | "float" }
+dsl_type = { "bool" | "float" }
 number = @{ (ASCII_DIGIT+) ~ ("." ~ ASCII_DIGIT+)? }
 bool = { "true" | "false" }
 value = { number | bool }
 identifier = @{ (ASCII_ALPHA | ASCII_DIGIT | "_")+ }
 prim_expr = { identifier | value }
-bool_expr = { ("(" ~ ("and" | "or" | "==" | ">" | "<") ~ expr ~ expr ~ ")") | bool }
+and = { "and" }
+or = { "or" }
+equals = { "==" }
+greater_than = { ">" }
+less_than = { "<" }
+bool_expr = { ("(" ~ (and | or | equals | less_than | greater_than) ~ expr ~ expr ~ ")") | bool }
 arith_expr = { "(" ~ ("+" | "-" | "*" | "/") ~ expr ~ expr ~ ")" }
 expr = { (arith_expr | bool_expr | prim_expr) }
 speaker = { identifier }
 principal = { identifier }
 says = { "says" ~ bool_expr+ }
-create = { "create" ~ identifier ~ type ~ bool_expr}
+create = { "create" ~ identifier ~ dsl_type ~ bool_expr}
 assign = { "assign" ~ identifier ~ value }
 speaksfor = { "speaksfor" ~ principal ~ principal ~ identifier }
 subprincipal = { "subprincipal" ~ principal ~ principal }

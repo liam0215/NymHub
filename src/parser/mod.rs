@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::command::{Assign, Command, Create, Says, Speaksfor, Subprincipal};
+use crate::command::{Assign, BoolExpr, Command, Create, DSLType, Says, Speaksfor, Subprincipal};
 use pest::iterators::Pair;
 use pest::Parser;
 use pest_derive::Parser;
@@ -43,7 +43,7 @@ impl NymHubDSL {
             if action.as_rule() == Rule::speaker {
                 speaker = action.into_inner().next().unwrap().as_span().as_str();
             } else {
-                Self::parse_action(&speaker, &action, commands)?;
+                Self::parse_action(&speaker, action, commands)?;
             }
         }
         Ok(())
@@ -51,7 +51,7 @@ impl NymHubDSL {
 
     fn parse_action(
         speaker: &&str,
-        action: &Pair<Rule>,
+        action: Pair<Rule>,
         commands: &mut Vec<Box<dyn Command>>,
     ) -> Result<(), PestError> {
         match action.as_rule() {
@@ -62,7 +62,7 @@ impl NymHubDSL {
                 commands.push(Box::new(Assign::with_speaker(speaker.to_string())));
             }
             Rule::create => {
-                commands.push(Box::new(Create::with_speaker(speaker.to_string())));
+                Self::parse_create(speaker, action, commands)?;
             }
             Rule::speaksfor => {
                 commands.push(Box::new(Speaksfor::with_speaker(speaker.to_string())));
@@ -72,6 +72,35 @@ impl NymHubDSL {
             }
             _ => unreachable!(),
         }
+        Ok(())
+    }
+
+    fn parse_create(
+        speaker: &&str,
+        create: Pair<Rule>,
+        commands: &mut Vec<Box<dyn Command>>,
+    ) -> Result<(), PestError> {
+        let mut command = Create::with_speaker(speaker.to_string());
+        for token in create.into_inner() {
+            match token.as_rule() {
+                Rule::identifier => {
+                    command.id = token.as_span().as_str().to_string();
+                }
+                Rule::dsl_type => {
+                    command.dsl_type = if token.as_span().as_str() == "bool" {
+                        DSLType::Bool
+                    } else {
+                        DSLType::Float
+                    };
+                }
+                Rule::bool_expr => {
+                    // TODO: Implement bool expression parsing
+                    command.free = BoolExpr::Bool(false);
+                }
+                _ => (),
+            }
+        }
+        commands.push(Box::new(command));
         Ok(())
     }
 }

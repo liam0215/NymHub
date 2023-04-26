@@ -27,16 +27,16 @@ impl Default for DSLValue {
 pub struct Create {
     pub speaker: String,
     pub id: String,
-    pub v_type: DSLType,
+    pub dsl_type: DSLType,
     pub free: BoolExpr,
 }
 
 impl Create {
-    pub fn new(speaker: String, id: String, v_type: DSLType, free: BoolExpr) -> Self {
+    pub fn new(speaker: String, id: String, dsl_type: DSLType, free: BoolExpr) -> Self {
         Create {
             speaker,
             id,
-            v_type,
+            dsl_type,
             free,
         }
     }
@@ -45,7 +45,7 @@ impl Create {
         Create {
             speaker,
             id: String::new(),
-            v_type: DSLType::Bool,
+            dsl_type: DSLType::Bool,
             free: BoolExpr::Bool(false),
         }
     }
